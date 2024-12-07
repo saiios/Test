@@ -52,7 +52,9 @@ struct ContentView: View {
             .onTapGesture {
                 viewModel.fetchCatData()
             }
-            
+            .onAppear {
+                viewModel.fetchCatData()
+            }
             // Error Message (if there's an error)
             if let errorMsg = viewModel.errorMessage {
                 Text("Error: \(errorMsg)")
