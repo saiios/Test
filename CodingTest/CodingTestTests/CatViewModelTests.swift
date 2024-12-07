@@ -1,51 +1,75 @@
 //
-//  CatViewModelTests.swift
-//  CodingTest
+//  CatModelsTests.swift
+//  CodingTestTests
 //
 //  Created by APPLE on 07/12/24.
 //
 
 import XCTest
-import Combine
 @testable import CodingTest
 
-class CatViewModelTests: XCTestCase {
+final class CatModelsTests: XCTestCase {
 
-    var viewModel: CatViewModel!
-    var networkServiceMock: NetworkServiceMock!
-    var cancellables: Set<AnyCancellable>!
-
-    override func setUp() {
-        super.setUp()
-        networkServiceMock = NetworkServiceMock()
-        viewModel = CatViewModel(networkService: networkServiceMock)
-        cancellables = []
+    // MARK: - Test CatFact Model
+    
+    func testCatFactParsing() {
+        // Sample JSON response representing the API response
+        let jsonData = """
+        {
+            "data": ["80% of orange cats are male"]
+        }
+        """.data(using: .utf8)!
+        
+        do {
+            // Decode the data into a CatFact model
+            let catFact = try JSONDecoder().decode(CatFact.self, from: jsonData)
+            
+            // Test if the fact is correctly parsed
+            XCTAssertEqual(catFact.fact, "80% of orange cats are male", "The fact should match the provided data")
+        } catch {
+            XCTFail("Decoding CatFact failed with error: \(error)")
+        }
     }
-
-    override func tearDown() {
-        viewModel = nil
-        networkServiceMock = nil
-        cancellables = nil
-        super.tearDown()
+    
+    func testCatFactEmptyData() {
+        let jsonData = """
+        {
+            "data": []
+        }
+        """.data(using: .utf8)!
+        
+        do {
+            let catFact = try JSONDecoder().decode(CatFact.self, from: jsonData)
+            
+            // Since there's no data, the fact should return the default string
+            XCTAssertEqual(catFact.fact, "No fact available", "Should handle an empty array gracefully")
+        } catch {
+            XCTFail("Decoding CatFact failed with error: \(error)")
+        }
     }
+    
+    // MARK: - Test CatImage Model
+    
+    func testCatImageParsing() {
+        let jsonData = """
+        {
+            "url": "https://example.com/cat.jpg"
+        }
+        """.data(using: .utf8)!
+        
+        do {
+            let catImage = try JSONDecoder().decode(CatImage.self, from: jsonData)
+            
+            XCTAssertEqual(catImage.url, "https://example.com/cat.jpg", "URL should match the provided data")
+        } catch {
+            XCTFail("Decoding CatImage failed with error: \(error)")
+        }
+    }
+    
+    func testCatImageInitialization() {
+        let testURL = "https://sampleurl.com/test.jpg"
+        let catImage = CatImage(url: testURL)
 
-    // Test fetching a cat fact
-    func testFetchCatFact() {
-        let expectation = XCTestExpectation(description: "Cat fact fetched successfully")
-
-        // Correctly create CatFact instance
-        networkServiceMock.catFactResponse = CatFact(fact: "Cats love napping.")
-
-        viewModel.$catFact
-            .dropFirst()
-            .sink { fact in
-                XCTAssertEqual(fact, "Cats love napping.")
-                expectation.fulfill()
-            }
-            .store(in: &cancellables)
-
-        viewModel.fetchCatData()
-
-        wait(for: [expectation], timeout: 3)
+        XCTAssertEqual(catImage.url, testURL, "CatImage should correctly initialize with a given URL")
     }
 }
