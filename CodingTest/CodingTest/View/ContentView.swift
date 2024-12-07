@@ -6,40 +6,33 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct ContentView: View {
     @StateObject private var viewModel = CatViewModel()
 
     var body: some View {
-        // Use a full-screen view to capture taps
         VStack {
-            // Cat Image
+            // Load Cat Image with Kingfisher caching and fit to screen width
             if let url = URL(string: viewModel.catImageUrl) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
+                KFImage(url)
+                    .placeholder {
                         ProgressView()
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: .infinity, maxHeight: 300)
-                    case .failure:
-                        Image(systemName: "photo")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: .infinity, maxHeight: 300)
-                    @unknown default:
-                        EmptyView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .scaleEffect(1.5)
                     }
-                }
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: .infinity)  // Ensures the image fits the screen width
+                    .padding(.bottom, 20)       // Adds some spacing below the image
             }
 
-            // Cat Fact
+            // Cat Fact Text Below the Image
             Text(viewModel.catFact)
                 .font(.headline)
                 .multilineTextAlignment(.center)
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.bottom, 30)
 
             Spacer()
         }
@@ -52,5 +45,6 @@ struct ContentView: View {
         .onAppear {
             viewModel.fetchCatData()
         }
+        .navigationTitle("Tap to Refresh")
     }
 }
