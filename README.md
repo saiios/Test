@@ -118,5 +118,6 @@ Open the Test Navigator in Xcode.
 
 Run all Unit and UI test cases.
 
+![Simulator Screenshot - iPhone 16 Pro - 2024-12-07 at 21 13 37](https://github.com/user-attachments/assets/c58a76ba-e8ce-4fdb-8bfd-8c35e919c64d)
 
-![Simulator Screenshot - iPhone 16 Pro - 2024-12-07 at 20 48 26](https://github.com/user-attachments/assets/3e76199c-4cd0-4df9-92ee-aa72ec6d533a)
+
