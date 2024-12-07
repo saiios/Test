@@ -27,24 +27,25 @@ struct ContentView: View {
                             .aspectRatio(contentMode: .fit)
                             .frame(maxWidth: .infinity)
                             .clipShape(RoundedRectangle(cornerRadius: 15))
-                            .shadow(radius: 5)
+                            .shadow(color: shadowColor, radius: 5) // Adaptive shadow
                             .transition(.opacity)
                             .animation(.easeInOut(duration: 0.5), value: viewModel.catImageUrl)
                             .accessibilityIdentifier("catImageView")
                     }
 
-                    // Cat Fact with scroll support and padding
+                    // Cat Fact with scroll support and adaptive padding
                     Text(viewModel.catFact)
                         .font(.headline)
                         .multilineTextAlignment(.center)
                         .padding()
+                        .foregroundColor(.primary) // Adaptive text color
                         .accessibilityIdentifier("Cat Fact")
                     
                     Spacer()
                 }
                 .padding()
             }
-            .background(Color(UIColor.systemBackground))
+            .background(backgroundColor) // Adaptive background
             .navigationTitle("Tap to Refresh")
             .refreshable {
                 viewModel.fetchCatData()
@@ -65,5 +66,15 @@ struct ContentView: View {
             }
         }
     }
+
+    // Adaptive Colors
+    private var backgroundColor: Color {
+        Color("BackgroundColor") // Define in Assets.xcassets for light/dark variants
+    }
+
+    private var shadowColor: Color {
+        Color("ShadowColor") // Define in Assets.xcassets for light/dark variants
+    }
 }
+
 
