@@ -120,4 +120,5 @@ Run all Unit and UI test cases.
 
 ![Simulator Screenshot - iPhone 16 Pro - 2024-12-07 at 21 13 37](https://github.com/user-attachments/assets/c58a76ba-e8ce-4fdb-8bfd-8c35e919c64d)
 
+![Simulator Screenshot - iPhone 16 Pro - 2024-12-07 at 21 16 19](https://github.com/user-attachments/assets/baafc17f-fd18-4a40-a6fa-37936adeeb23)
 
