@@ -3,6 +3,7 @@
 //  CodingTest
 //
 
+// ContentView.swift
 import SwiftUI
 import Kingfisher
 
@@ -11,7 +12,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {   // Ensure scroll for content overflow
+            ScrollView {
                 VStack(spacing: 20) {
                     
                     // Load Cat Image with Kingfisher caching
@@ -29,22 +30,23 @@ struct ContentView: View {
                             .shadow(radius: 5)
                             .transition(.opacity)
                             .animation(.easeInOut(duration: 0.5), value: viewModel.catImageUrl)
+                            .accessibilityIdentifier("catImageView")
                     }
-                    
+
                     // Cat Fact with scroll support and padding
                     Text(viewModel.catFact)
                         .font(.headline)
                         .multilineTextAlignment(.center)
                         .padding()
-                        .accessibilityLabel(Text(viewModel.catFact))
+                        .accessibilityIdentifier("Cat Fact")
                     
                     Spacer()
                 }
                 .padding()
             }
-            .background(Color(UIColor.systemBackground))  // Consistent background
-            .navigationTitle("Tap to Refresh")  // Navigation Title
-            .refreshable {  // Pull-to-refresh action
+            .background(Color(UIColor.systemBackground))
+            .navigationTitle("Tap to Refresh")
+            .refreshable {
                 viewModel.fetchCatData()
             }
             .onTapGesture {
@@ -57,7 +59,9 @@ struct ContentView: View {
                     .foregroundColor(.red)
                     .font(.headline)
                     .padding()
+                    .accessibilityIdentifier("errorLabel")
             }
         }
     }
 }
+
