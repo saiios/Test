@@ -10,36 +10,40 @@ import Foundation
 import Combine
 
 protocol NetworkServiceProtocol {
-    func fetchCatFact() -> AnyPublisher<CatFact, Error>
-    func fetchCatImage() -> AnyPublisher<[CatImage], Error>
+    func fetchCatFact() -> AnyPublisher<String, Error>
+    func fetchCatImage() -> AnyPublisher<String, Error>
 }
-import Foundation
-import Combine
 
 class NetworkService: NetworkServiceProtocol {
+    private let session: URLSession
 
-    func fetchCatFact() -> AnyPublisher<CatFact, Error> {
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
+
+    func fetchCatFact() -> AnyPublisher<String, Error> {
         let urlString = "https://meowfacts.herokuapp.com"
-        guard let url = URL(string: urlString) else {
-            return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
-        }
-
-        return URLSession.shared.dataTaskPublisher(for: url)
-            .map(\.data)
-            .decode(type: CatFact.self, decoder: JSONDecoder())
+        return performRequest(urlString: urlString)
+            .map { (response: CatFact) in response.fact }
             .eraseToAnyPublisher()
     }
-    
-    func fetchCatImage() -> AnyPublisher<[CatImage], Error> {
+
+    func fetchCatImage() -> AnyPublisher<String, Error> {
         let urlString = "https://api.thecatapi.com/v1/images/search"
+        return performRequest(urlString: urlString)
+            .compactMap { (response: [CatImage]) in response.first?.url }
+            .eraseToAnyPublisher()
+    }
+
+    private func performRequest<T: Decodable>(urlString: String) -> AnyPublisher<T, Error> {
         guard let url = URL(string: urlString) else {
             return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
         }
 
-        return URLSession.shared.dataTaskPublisher(for: url)
+        return session.dataTaskPublisher(for: url)
             .map(\.data)
-            .decode(type: [CatImage].self, decoder: JSONDecoder())
+            .decode(type: T.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.global(qos: .background))
             .eraseToAnyPublisher()
     }
 }
-

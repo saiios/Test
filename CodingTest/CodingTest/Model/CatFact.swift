@@ -7,18 +7,14 @@
 
 import Foundation
 
-struct CatFact: Codable {
+struct CatFact: Decodable {
     let data: [String]
 
     var fact: String {
         data.first ?? "No fact available"
     }
 }
-// Define a model representing the Cat Image
-struct CatImage: Codable {
-    let url: String
 
-    init(url: String) {
-        self.url = url
-    }
+struct CatImage: Decodable {
+    let url: String
 }

@@ -20,21 +20,26 @@ class CatViewModel: ObservableObject {
         self.networkService = networkService
     }
 
-    func fetchCatData() {
+    func fetchCatData(completion: @escaping () -> Void) {
         let factPublisher = networkService.fetchCatFact()
-            .map { $0.fact }
-            .replaceError(with: "Could not fetch cat fact")
-
         let imagePublisher = networkService.fetchCatImage()
-            .compactMap { $0.first?.url }
-            .replaceError(with: "")
 
         Publishers.Zip(factPublisher, imagePublisher)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] fact, imageUrl in
+            .sink { [weak self] subscribersCompletion in
+                switch subscribersCompletion {
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
+                case .finished:
+                    break
+                }
+                completion()
+            } receiveValue: { [weak self] fact, imageUrl in
                 self?.catFact = fact
                 self?.catImageUrl = imageUrl
             }
             .store(in: &cancellables)
     }
 }
+
+
