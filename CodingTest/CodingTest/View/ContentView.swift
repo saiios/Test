@@ -104,4 +104,3 @@ struct CustomLoaderView<Content: View>: View {
         .animation(.easeInOut, value: isLoading)
     }
 }
-

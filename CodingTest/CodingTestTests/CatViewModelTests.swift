@@ -6,70 +6,79 @@
 //
 
 import XCTest
+import Combine
 @testable import CodingTest
 
-final class CatModelsTests: XCTestCase {
+final class CatViewModelTests: XCTestCase {
 
-    // MARK: - Test CatFact Model
-    
-    func testCatFactParsing() {
-        // Sample JSON response representing the API response
-        let jsonData = """
-        {
-            "data": ["80% of orange cats are male"]
-        }
-        """.data(using: .utf8)!
-        
-        do {
-            // Decode the data into a CatFact model
-            let catFact = try JSONDecoder().decode(CatFact.self, from: jsonData)
-            
-            // Test if the fact is correctly parsed
-            XCTAssertEqual(catFact.fact, "80% of orange cats are male", "The fact should match the provided data")
-        } catch {
-            XCTFail("Decoding CatFact failed with error: \(error)")
-        }
-    }
-    
-    func testCatFactEmptyData() {
-        let jsonData = """
-        {
-            "data": []
-        }
-        """.data(using: .utf8)!
-        
-        do {
-            let catFact = try JSONDecoder().decode(CatFact.self, from: jsonData)
-            
-            // Since there's no data, the fact should return the default string
-            XCTAssertEqual(catFact.fact, "No fact available", "Should handle an empty array gracefully")
-        } catch {
-            XCTFail("Decoding CatFact failed with error: \(error)")
-        }
-    }
-    
-    // MARK: - Test CatImage Model
-    
-    func testCatImageParsing() {
-        let jsonData = """
-        {
-            "url": "https://example.com/cat.jpg"
-        }
-        """.data(using: .utf8)!
-        
-        do {
-            let catImage = try JSONDecoder().decode(CatImage.self, from: jsonData)
-            
-            XCTAssertEqual(catImage.url, "https://example.com/cat.jpg", "URL should match the provided data")
-        } catch {
-            XCTFail("Decoding CatImage failed with error: \(error)")
-        }
-    }
-    
-    func testCatImageInitialization() {
-        let testURL = "https://sampleurl.com/test.jpg"
-        let catImage = CatImage(url: testURL)
+    var viewModel: CatViewModel!
+    var cancellables = Set<AnyCancellable>()
 
-        XCTAssertEqual(catImage.url, testURL, "CatImage should correctly initialize with a given URL")
+    override func tearDown() {
+        viewModel = nil
+        cancellables.removeAll()
+        super.tearDown()
+    }
+
+    func testFetchCatDataSuccess() {
+        let mockService = MockNetworkServiceSuccess()
+        viewModel = CatViewModel(networkService: mockService)
+
+        let expectationFact = XCTestExpectation(description: "Cat Fact Updated")
+        let expectationImageUrl = XCTestExpectation(description: "Cat Image URL Updated")
+
+        viewModel.$catFact
+            .dropFirst()
+            .sink { fact in
+                XCTAssertEqual(fact, "Cats have sharp claws.")
+                expectationFact.fulfill()
+            }
+            .store(in: &cancellables)
+
+        viewModel.$catImageUrl
+            .dropFirst()
+            .sink { imageUrl in
+                XCTAssertEqual(imageUrl, "https://example.com/cat.jpg")
+                expectationImageUrl.fulfill()
+            }
+            .store(in: &cancellables)
+
+        viewModel.fetchCatData {
+            expectationFact.fulfill()
+            expectationImageUrl.fulfill()
+        }
+
+        wait(for: [expectationFact, expectationImageUrl], timeout: 5)
+    }
+
+    func testFetchCatDataFailure() {
+        let mockService = MockNetworkServiceFailure()
+        viewModel = CatViewModel(networkService: mockService)
+
+        let factFailureExpectation = XCTestExpectation(description: "Cat Fact Should Fail")
+        let imageFailureExpectation = XCTestExpectation(description: "Cat Image Should Fail")
+
+        viewModel.$catFact
+            .dropFirst()
+            .sink { fact in
+                XCTAssertEqual(fact, "Could not fetch cat fact")
+                factFailureExpectation.fulfill()
+            }
+            .store(in: &cancellables)
+
+        viewModel.$catImageUrl
+            .dropFirst()
+            .sink { imageUrl in
+                XCTAssertEqual(imageUrl, "")
+                imageFailureExpectation.fulfill()
+            }
+            .store(in: &cancellables)
+
+        viewModel.fetchCatData {
+            factFailureExpectation.fulfill()
+            imageFailureExpectation.fulfill()
+        }
+
+        wait(for: [factFailureExpectation, imageFailureExpectation], timeout: 5)
     }
 }
