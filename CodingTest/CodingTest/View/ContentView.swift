@@ -7,7 +7,6 @@
 //  ContentView.swift
 //  CodingTest
 //
-
 import SwiftUI
 import Kingfisher
 
@@ -27,6 +26,7 @@ struct ContentView: View {
                                     .aspectRatio(contentMode: .fit)
                                     .clipShape(RoundedRectangle(cornerRadius: 15))
                                     .shadow(color: Color("ShadowColor"), radius: 5)
+                                    .accessibilityIdentifier("catImage") // Added for UI Testing
                             }
                         }
 
@@ -35,6 +35,7 @@ struct ContentView: View {
                                 .font(.headline)
                                 .multilineTextAlignment(.center)
                                 .padding()
+                                .accessibilityIdentifier("catFactText") // Added for UI Testing
                         }
                     }
                     .padding()
@@ -45,6 +46,7 @@ struct ContentView: View {
                 if isImageLoading {
                     Color.black.opacity(0.001) // Almost invisible but captures taps
                         .ignoresSafeArea()
+                        .accessibilityIdentifier("loadingOverlay") // Added for UI Testing
                 }
                 
                 if let errorMsg = viewModel.errorMessage {
@@ -54,10 +56,13 @@ struct ContentView: View {
                             .foregroundColor(.red)
                             .font(.headline)
                             .padding()
+                            .accessibilityIdentifier("errorMessage") // Added for UI Testing
                     }
                 }
             }
             .navigationTitle("Tap to Refresh")
+            .accessibilityIdentifier("NavigationTitle")
+
             .refreshable {
                 fetchCatData()
             }
@@ -97,6 +102,7 @@ struct CustomLoaderView<Content: View>: View {
                     .progressViewStyle(CircularProgressViewStyle())
                     .scaleEffect(1.5)
                     .frame(maxWidth: .infinity, maxHeight: 200)
+                    .accessibilityIdentifier("progressView") // Added for UI Testing
             } else {
                 content()
             }
